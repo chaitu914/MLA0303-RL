@@ -1,0 +1,120 @@
+#Exp2
+import numpy as np
+
+# Define the grid world (states)
+states = [
+    (0, 0), (0, 1), (0, 2),
+    (1, 0), (1, 1), (1, 2),
+    (2, 0), (2, 1), (2, 2)
+]
+
+# Define possible actions
+actions = {
+    'U': (-1, 0),
+    'D': (1, 0),
+    'L': (0, -1),
+    'R': (0, 1)
+}
+
+# Define the state transition function
+def transition(state, action):
+
+    new_state = (
+        state[0] + action[0],
+        state[1] + action[1]
+    )
+
+    if new_state in states:
+        return new_state
+
+    # Stay in the same state if action is invalid
+    return state
+
+
+# Define rewards
+rewards = {
+    (0, 0): -1,
+    (0, 1): -1,
+    (0, 2): -1,
+    (1, 0): -1,
+    (1, 1): -1,
+    (1, 2): -1,
+    (2, 0): -1,
+    (2, 1): -1,
+    (2, 2): 1
+}
+
+# Discount factor
+gamma = 0.9
+
+
+# Define policy
+policy = {
+    (0, 0): 'R',
+    (0, 1): 'R',
+    (0, 2): 'D',
+    (1, 0): 'D',
+    (1, 1): 'D',
+    (1, 2): 'D',
+    (2, 0): 'R',
+    (2, 1): 'R'
+}
+
+
+# Initialize state values
+V = {state: 0 for state in states}
+
+
+# Value iteration
+while True:
+
+    delta = 0
+
+    for state in states:
+
+        # Goal state
+        if state == (2, 2):
+            continue
+
+        v = V[state]
+
+        # Select action according to policy
+        action = policy[state]
+
+        # Find next state
+        next_state = transition(
+            state,
+            actions[action]
+        )
+
+        # Get reward
+        reward = rewards[next_state]
+
+        # Bellman equation
+        V[state] = reward + gamma * V[next_state]
+
+        # Calculate change
+        delta = max(
+            delta,
+            abs(v - V[state])
+        )
+
+    # Stop when values converge
+    if delta < 1e-6:
+        break
+
+
+# Print state values
+print("State Values:")
+print("----------------")
+
+for i in range(3):
+
+    for j in range(3):
+
+        state = (i, j)
+
+        print(
+            f"State {state}: "
+            f"Value = {V[state]:.2f}"
+        )
