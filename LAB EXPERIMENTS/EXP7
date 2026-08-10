@@ -1,0 +1,91 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+# Multi-Armed Bandit Environment
+class Bandit:
+
+    def __init__(self, arms):
+        self.arms = arms
+
+    def pull_arm(self, arm):
+        return np.random.rand() < self.arms[arm]
+
+
+# Epsilon-Greedy Algorithm
+def epsilon_greedy(epsilon, num_iterations, bandit):
+
+    num_actions = len(bandit.arms)
+
+    # Estimated value of each action
+    action_values = np.zeros(num_actions)
+
+    # Number of times each action is selected
+    action_attempts = np.zeros(num_actions)
+
+    rewards = []
+
+    for _ in range(num_iterations):
+
+        # Exploration
+        if np.random.rand() < epsilon:
+            action = np.random.randint(num_actions)
+
+        # Exploitation
+        else:
+            action = np.argmax(action_values)
+
+        # Get reward
+        reward = bandit.pull_arm(action)
+
+        rewards.append(reward)
+
+        # Update action count
+        action_attempts[action] += 1
+
+        # Update estimated action value
+        action_values[action] += (
+            reward - action_values[action]
+        ) / action_attempts[action]
+
+    return rewards
+
+
+# Reward probabilities of the three arms
+arms = [0.3, 0.5, 0.8]
+
+# Create bandit environment
+bandit = Bandit(arms)
+
+
+# Different epsilon values
+epsilon_values = [0.1, 0.3, 0.5]
+
+num_iterations = 1000
+
+
+# Plot results
+plt.figure(figsize=(8, 6))
+
+for epsilon in epsilon_values:
+
+    rewards = epsilon_greedy(
+        epsilon,
+        num_iterations,
+        bandit
+    )
+
+    cumulative_reward = np.cumsum(rewards)
+
+    plt.plot(
+        cumulative_reward,
+        label=f"Epsilon = {epsilon}"
+    )
+
+
+plt.xlabel("Iterations")
+plt.ylabel("Cumulative Reward")
+plt.title("Exploration vs Exploitation in Reinforcement Learning")
+plt.legend()
+plt.grid()
+plt.show()
