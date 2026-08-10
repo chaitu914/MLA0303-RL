@@ -1,0 +1,70 @@
+import numpy as np
+
+# Define the 3 x 3 grid world
+grid_world = np.zeros((3, 3))
+
+# Define possible actions
+# Left, Right, Up, Down
+actions = [
+    (0, -1),
+    (0, 1),
+    (-1, 0),
+    (1, 0)
+]
+
+# Define rewards
+rewards = {
+    (0, 2): 10,    # Goal state
+    (1, 2): -10    # Penalty state
+}
+
+# Discount factor
+gamma = 0.9
+
+# Number of iterations
+num_iterations = 100
+
+# Bellman update
+for _ in range(num_iterations):
+
+    new_grid_world = np.copy(grid_world)
+
+    for i in range(3):
+        for j in range(3):
+
+            # Skip goal and penalty states
+            if (i, j) in rewards:
+                continue
+
+            new_values = []
+
+            # Check all possible actions
+            for action in actions:
+
+                next_i = i + action[0]
+                next_j = j + action[1]
+
+                # Check whether next state is inside grid
+                if 0 <= next_i < 3 and 0 <= next_j < 3:
+
+                    next_state = (next_i, next_j)
+
+                    # Get reward of next state
+                    reward = rewards.get(next_state, 0)
+
+                    # Bellman equation
+                    value = reward + gamma * grid_world[next_i, next_j]
+
+                    new_values.append(value)
+
+            # Select maximum value
+            if new_values:
+                new_grid_world[i, j] = max(new_values)
+
+    grid_world = new_grid_world
+
+
+# Print final state values
+print("Final State Values:")
+print("-------------------")
+print(np.round(grid_world, 2))
